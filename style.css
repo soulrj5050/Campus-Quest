@@ -1,0 +1,243 @@
+/* ============================================================
+   CAMPUS QUEST – Stylesheet
+   Mobile-first dark-theme PWA styling.
+   ============================================================ */
+
+/* ---------- RESET & BASE ---------- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f23;color:#e0e0e0}
+body{position:relative}
+input,button,textarea,select{font-family:inherit;font-size:inherit}
+a{color:#00d4ff;text-decoration:none}
+
+/* ---------- COLOUR TOKENS ---------- */
+:root{
+  --bg:#0f0f23;--bg2:#1a1a2e;--bg3:#2a2a4a;
+  --primary:#ff6b35;--primary-glow:rgba(255,107,53,.4);
+  --secondary:#00d4ff;--secondary-glow:rgba(0,212,255,.3);
+  --success:#00ff88;--danger:#ff4757;--gold:#ffd700;
+  --text:#e0e0e0;--text-muted:#8892b0;
+  --radius:12px;
+}
+
+/* ---------- SCREEN SYSTEM ---------- */
+.screen{display:none;position:fixed;inset:0;overflow-y:auto;z-index:1;background:var(--bg)}
+.screen.active{display:flex;flex-direction:column}
+
+/* ======================= SPLASH ======================= */
+#splash-screen{align-items:center;justify-content:center;text-align:center}
+.splash-content{animation:fadeIn .6s ease}
+.splash-icon{font-size:80px;margin-bottom:16px;animation:float 2s ease-in-out infinite}
+.splash-title{font-size:42px;font-weight:800;letter-spacing:4px;background:linear-gradient(135deg,var(--primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.loading-bar{width:200px;height:4px;background:var(--bg3);border-radius:2px;margin:24px auto 0;overflow:hidden}
+.loading-fill{width:0;height:100%;background:var(--primary);border-radius:2px;animation:load 1.8s ease-in-out forwards}
+@keyframes load{0%{width:0}100%{width:100%}}
+
+/* ======================= WELCOME ======================= */
+#welcome-screen{align-items:center;justify-content:center;text-align:center;padding:24px}
+.welcome-content{width:100%;max-width:380px}
+.welcome-icon{font-size:72px;margin-bottom:8px}
+.welcome-content h1{font-size:32px;font-weight:800;letter-spacing:3px;color:#fff;margin-bottom:4px}
+.tagline{color:var(--text-muted);margin-bottom:28px;letter-spacing:2px;font-size:14px}
+#player-name-input{width:100%;padding:14px 16px;border-radius:var(--radius);border:2px solid var(--bg3);background:var(--bg2);color:#fff;font-size:16px;text-align:center;margin-bottom:12px;transition:border-color .2s}
+#player-name-input:focus{outline:none;border-color:var(--primary)}
+.welcome-back{color:var(--gold);font-weight:600;margin-bottom:12px}
+.divider{display:flex;align-items:center;margin:20px 0;color:var(--text-muted);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bg3)}
+.divider span{padding:0 12px}
+
+/* ---------- BUTTONS ---------- */
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);font-size:16px;font-weight:700;cursor:pointer;transition:transform .1s,opacity .2s;text-align:center;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn+.btn{margin-top:10px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:var(--bg3);color:var(--text)}
+.btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+.btn-admin{background:var(--bg2);color:var(--text-muted);border:1px dashed var(--bg3)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-encounter{background:linear-gradient(135deg,var(--primary),#ff9f1c);color:#fff;font-size:18px;padding:16px;animation:pulse-btn 1.5s ease-in-out infinite}
+.btn-claim{background:linear-gradient(135deg,var(--gold),#ff9f1c);color:#1a1a2e;font-size:18px;font-weight:800;padding:16px;border-radius:var(--radius);position:absolute;bottom:24px;left:24px;right:24px;z-index:20}
+.icon-btn{background:none;border:none;color:#fff;font-size:22px;padding:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* ======================= GAME SCREEN ======================= */
+#game-screen{display:none;flex-direction:column}
+#game-screen.active{display:flex}
+
+/* Header */
+#game-header{position:relative;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(26,26,46,0.85);border-bottom:1px solid var(--bg3);z-index:10;flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:8px}
+.hdr-center{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:700;color:var(--gold)}
+.hdr-right{font-size:14px;color:var(--text-muted);font-weight:600}
+#player-display-name{font-size:14px;color:var(--text-muted);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trophy{font-size:20px}
+
+/* GPS bar */
+#gps-bar{position:relative;display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(26,26,46,0.85);border-bottom:1px solid var(--bg3);font-size:12px;color:var(--text-muted);z-index:10;flex-shrink:0}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:#666;flex-shrink:0}
+.gps-dot.active{background:var(--success);box-shadow:0 0 6px var(--success)}
+.gps-dot.warning{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.gps-dot.error{background:var(--danger)}
+
+/* Map */
+#map-container{flex:1;z-index:1;min-height:0}
+
+/* FAB */
+.fab{position:fixed;bottom:200px;right:14px;width:44px;height:44px;border-radius:50%;background:var(--bg2);border:2px solid var(--bg3);font-size:20px;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent}
+
+/* Checkpoint panel */
+#checkpoint-panel{position:relative;background:rgba(26,26,46,0.85);border-top:2px solid var(--bg3);padding:14px 16px;z-index:10;flex-shrink:0;min-height:140px}
+#cp-panel-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+#cp-status-icon{font-size:28px;flex-shrink:0}
+#cp-info{flex:1;min-width:0}
+#cp-name{font-size:16px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cp-distance{font-size:13px;color:var(--text-muted)}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.badge-locked{background:var(--bg3);color:var(--text-muted)}
+.badge-nearby{background:rgba(255,215,0,.15);color:var(--gold)}
+.badge-available{background:rgba(0,255,136,.15);color:var(--success);animation:pulse-badge 1s ease-in-out infinite}
+.badge-completed{background:rgba(0,212,255,.15);color:var(--secondary)}
+
+#cp-clue-box{background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.clue-label{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px;letter-spacing:1px}
+#cp-clue-text{font-size:13px;color:var(--text);font-style:italic;line-height:1.4}
+
+#cp-actions{text-align:center}
+
+/* No-checkpoints overlay */
+#no-checkpoints-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;background:rgba(15,15,35,.85)}
+.overlay-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:24px;text-align:center;margin:24px;max-width:340px}
+.overlay-card p{margin-bottom:12px;font-size:14px;line-height:1.5}
+
+/* ======================= ENCOUNTER ======================= */
+#encounter-screen{background:#000}
+#encounter-header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(0,0,0,.6);position:absolute;top:0;left:0;right:0;z-index:30}
+#encounter-title{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--gold)}
+
+#camera-container{position:relative;width:100%;height:100%;overflow:hidden}
+#camera-video{width:100%;height:100%;object-fit:cover}
+
+#ar-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
+.ar-object{display:flex;flex-direction:column;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:ar-enter .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.ar-glow{position:absolute;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,var(--primary-glow) 0%,transparent 70%);animation:pulse-glow 2s ease-in-out infinite}
+.ar-emoji{font-size:100px;position:relative;z-index:2;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 0 20px var(--primary-glow))}
+.ar-name{font-size:16px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);margin-top:8px;position:relative;z-index:2}
+.ar-hint{position:absolute;bottom:90px;font-size:14px;color:rgba(255,255,255,.8);text-shadow:0 1px 4px #000;animation:fadeInUp .8s .4s both}
+
+/* Camera error */
+#camera-error{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;gap:12px;height:100%}
+#camera-error.active{display:flex}
+.error-icon{font-size:64px;opacity:.5}
+.error-help{font-size:13px;color:var(--text-muted);max-width:280px}
+
+/* ======================= REWARD ======================= */
+#reward-screen{align-items:center;justify-content:center;text-align:center;padding:24px}
+.reward-content{width:100%;max-width:380px;position:relative}
+.reward-celebration{font-size:64px;animation:bounce-in .5s cubic-bezier(.34,1.56,.64,1)}
+.reward-heading{font-size:24px;color:#fff;margin:8px 0;letter-spacing:2px}
+.reward-cp-name{font-size:16px;color:var(--secondary);margin-bottom:20px}
+.reward-points-box{background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,159,28,.15));border:1px solid rgba(255,107,53,.3);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.reward-label{font-size:11px;color:var(--text-muted);letter-spacing:2px;margin-bottom:4px}
+.reward-points{font-size:42px;font-weight:800;color:var(--gold);animation:count-up .6s ease-out}
+.reward-total-box{font-size:18px;font-weight:700;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px}
+.next-clue-box{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:16px;margin-bottom:20px;text-align:left}
+.clue-header{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
+.clue-text{font-size:15px;font-style:italic;color:var(--text);line-height:1.5}
+.all-complete{margin-bottom:20px}
+.all-complete .complete-icon{font-size:48px}
+.all-complete h3{color:var(--gold);margin:8px 0 4px}
+
+/* Confetti container */
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confetti-fall 2s ease-in forwards}
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(500px) rotate(720deg);opacity:0}}
+
+/* ======================= ADMIN ======================= */
+.admin-header{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--bg3)}
+.admin-header h2{font-size:18px;color:#fff}
+.admin-tools{padding:14px;display:flex;flex-direction:column;gap:12px}
+.admin-toggles{display:flex;flex-direction:column;gap:8px}
+.toggle-label{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;color:var(--text)}
+.toggle-label input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary)}
+.toggle-label small{color:var(--text-muted)}
+.admin-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.admin-buttons .btn{flex:1;min-width:120px;padding:10px;font-size:14px}
+.admin-cp-list{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.empty-msg{text-align:center;color:var(--text-muted);font-size:14px;padding:32px}
+
+.admin-cp-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.admin-cp-card .cp-order{font-size:20px;font-weight:800;color:var(--primary);min-width:28px;text-align:center}
+.admin-cp-card .cp-details{flex:1;min-width:0}
+.admin-cp-card .cp-card-name{font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-cp-card .cp-card-meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+.admin-cp-card .cp-card-actions{display:flex;gap:4px}
+.admin-cp-card .cp-card-actions button{font-size:18px}
+
+/* ======================= FORM ======================= */
+.form-header{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--bg3)}
+.form-header h2{font-size:18px;color:#fff}
+.form-body{padding:14px;overflow-y:auto;flex:1}
+.form-map{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;border:2px solid var(--bg3);margin-bottom:4px}
+.form-map-hint{font-size:12px;color:var(--text-muted);text-align:center;margin-bottom:14px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:4px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border-radius:8px;border:2px solid var(--bg3);background:var(--bg);color:#fff;font-size:15px}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--primary)}
+.form-group input[readonly]{opacity:.7}
+.form-group select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238892b0'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.form-hint{font-size:11px;color:var(--text-muted);margin-top:2px;display:block}
+.form-row{display:flex;gap:10px}
+.form-group.half{flex:1}
+.form-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;padding-bottom:40px}
+
+/* ======================= OVERLAY / MENU ======================= */
+.overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center}
+.overlay-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7)}
+.menu-content{position:relative;background:var(--bg2);border:1px solid var(--bg3);border-radius:var(--radius);padding:24px;width:90%;max-width:320px;display:flex;flex-direction:column;gap:10px;text-align:center}
+.menu-content h3{color:#fff;font-size:18px;margin-bottom:8px}
+
+/* ======================= TOAST ======================= */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg2);border:1px solid var(--bg3);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:14px;font-weight:600;z-index:200;transition:transform .3s ease;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:var(--success);color:var(--success)}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+.toast.warning{border-color:var(--gold);color:var(--gold)}
+
+/* ======================= PLAYER MARKER (Leaflet) ======================= */
+.player-marker{width:18px!important;height:18px!important;background:var(--secondary);border:3px solid #fff;border-radius:50%;box-shadow:0 0 10px var(--secondary-glow)}
+.player-marker-pulse{width:18px!important;height:18px!important;border-radius:50%;animation:marker-pulse 2s ease-in-out infinite}
+.accuracy-circle{fill:rgba(0,212,255,.08);stroke:rgba(0,212,255,.25);stroke-width:1}
+
+/* Checkpoint markers on map */
+.cp-marker{width:32px!important;height:32px!important;display:flex!important;align-items:center;justify-content:center;font-size:22px;border-radius:50%;border:2px solid var(--bg3);background:var(--bg2);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.cp-marker.available{border-color:var(--success);box-shadow:0 0 12px rgba(0,255,136,.4);animation:pulse-badge 1s ease-in-out infinite}
+.cp-marker.completed{opacity:.5;border-color:var(--secondary)}
+.cp-marker.locked{opacity:.6}
+
+/* Checkpoint radius circle on map */
+.cp-radius-default{fill:rgba(255,107,53,.06);stroke:rgba(255,107,53,.3);stroke-width:1;stroke-dasharray:6 4}
+.cp-radius-available{fill:rgba(0,255,136,.08);stroke:rgba(0,255,136,.4);stroke-width:2}
+.cp-radius-completed{fill:rgba(0,212,255,.04);stroke:rgba(0,212,255,.2);stroke-width:1;stroke-dasharray:4 4}
+
+/* ======================= ANIMATIONS ======================= */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+@keyframes pulse-glow{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.9;transform:scale(1.15)}}
+@keyframes pulse-btn{0%,100%{box-shadow:0 0 0 0 var(--primary-glow)}50%{box-shadow:0 0 0 12px transparent}}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes ar-enter{from{transform:scale(0) rotate(-180deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes bounce-in{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes count-up{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes marker-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.4)}50%{box-shadow:0 0 0 15px transparent}}
+
+/* ======================= UTILITIES / LEAFLET OVERRIDES ======================= */
+.leaflet-control-attribution{display:none!important}
+.leaflet-popup-content-wrapper{background:var(--bg2)!important;color:var(--text)!important;border-radius:8px!important;box-shadow:0 2px 12px rgba(0,0,0,.5)!important}
+.leaflet-popup-tip{background:var(--bg2)!important}
+
+/* Safe-area padding for notched phones */
+@supports(padding-top:env(safe-area-inset-top)){
+  #game-header{padding-top:calc(8px + env(safe-area-inset-top))}
+  #encounter-header{padding-top:calc(10px + env(safe-area-inset-top))}
+}

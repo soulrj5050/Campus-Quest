@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#ff6b35">
+  <title>Campus Quest</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <!-- Leaflet CSS (map library) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ======================== SCREEN: SPLASH ======================== -->
+  <div id="splash-screen" class="screen active">
+    <div class="splash-content">
+      <div class="splash-icon">🗺️</div>
+      <h1 class="splash-title">CAMPUS<br>QUEST</h1>
+      <div class="loading-bar"><div class="loading-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== SCREEN: WELCOME ======================== -->
+  <div id="welcome-screen" class="screen">
+    <div class="welcome-content">
+      <div class="welcome-icon">🏰</div>
+      <h1>CAMPUS QUEST</h1>
+      <p class="tagline">Explore · Discover · Conquer</p>
+
+      <!-- New game section -->
+      <div id="new-game-section">
+        <input type="text" id="player-name-input" placeholder="Enter your name, explorer…" maxlength="20" autocomplete="off">
+        <button id="start-game-btn" class="btn btn-primary" disabled>🚀 START QUEST</button>
+      </div>
+
+      <!-- Continue game section (shown when save exists) -->
+      <div id="continue-game-section" style="display:none">
+        <p id="welcome-back-msg" class="welcome-back"></p>
+        <button id="continue-game-btn" class="btn btn-primary">▶️ CONTINUE QUEST</button>
+        <button id="new-game-btn" class="btn btn-outline">🔄 NEW GAME</button>
+      </div>
+
+      <div class="divider"><span>or</span></div>
+      <button id="admin-mode-btn" class="btn btn-admin">⚙️ ADMIN MODE</button>
+    </div>
+  </div>
+
+  <!-- ======================== SCREEN: GAME ======================== -->
+  <div id="game-screen" class="screen">
+    
+    <div id="camera-container" style="position: absolute; inset: 0; z-index: 0; background: #000;">
+      <video id="camera-video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+      <div id="ar-overlay" style="display:none; position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div id="ar-object" class="ar-object">
+          <div class="ar-glow"></div>
+          <div id="ar-object-emoji" class="ar-emoji">📦</div>
+          <div id="ar-object-name" class="ar-name">Treasure Chest</div>
+        </div>
+        <div id="ar-hint" class="ar-hint">Tap the object to claim your reward!</div>
+        <button id="claim-reward-btn" class="btn btn-claim" style="position: absolute; bottom: 160px; left: 24px; right: 24px;">🎁 CLAIM REWARD</button>
+      </div>
+    </div>
+    
+    <!-- Camera error / fallback -->
+    <div id="camera-error" style="display:none; position: absolute; inset: 0; z-index: 20; background: #000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px;">
+      <div class="error-icon" style="font-size: 64px; opacity: 0.5;">📷</div>
+      <p id="camera-error-text">Camera access is required to play.</p>
+      <button id="retry-camera-btn" class="btn btn-outline" style="margin-top: 16px;">🔄 Retry Camera</button>
+      <button id="fallback-claim-btn" class="btn btn-primary" style="display:none; margin-top: 16px;">🎁 CLAIM REWARD (Fallback)</button>
+    </div>
+
+    <!-- Top header bar -->
+    <div id="game-header">
+      <div class="hdr-left">
+        <button id="back-menu-btn" class="icon-btn" aria-label="Menu">☰</button>
+        <span id="player-display-name">Explorer</span>
+      </div>
+      <div class="hdr-center">
+        <span class="trophy">🏆</span><span id="player-score">0</span>
+      </div>
+      <div class="hdr-right">
+        <span id="checkpoint-progress">0/0</span>
+      </div>
+    </div>
+
+    <!-- GPS status bar -->
+    <div id="gps-bar">
+      <span id="gps-dot" class="gps-dot"></span>
+      <span id="gps-status-text">Acquiring GPS…</span>
+      <span id="gps-accuracy-text"></span>
+    </div>
+
+    <!-- Map (Hidden in Camera-first mode) -->
+    <div id="map-container" style="display:none;"></div>
+
+    <!-- Centre-on-player FAB (Hidden) -->
+    <button id="center-map-btn" class="fab" aria-label="Centre map" style="display:none;">📍</button>
+
+    <div style="flex: 1;"></div> <!-- Spacer to push panel down -->
+
+    <!-- Bottom checkpoint panel -->
+    <div id="checkpoint-panel">
+      <div id="cp-panel-header">
+        <div id="cp-status-icon">🔒</div>
+        <div id="cp-info">
+          <div id="cp-name">No Active Checkpoint</div>
+          <div id="cp-distance"></div>
+        </div>
+        <div id="cp-state-badge" class="badge badge-locked">LOCKED</div>
+      </div>
+
+      <div id="cp-clue-box">
+        <div class="clue-label">🔎 CLUE</div>
+        <div id="cp-clue-text">Complete checkpoints to receive clues!</div>
+      </div>
+
+      <div id="cp-actions" style="display:none;">
+        <button id="open-checkpoint-btn" class="btn btn-encounter" style="display:none">
+          🎯 OPEN CHECKPOINT
+        </button>
+      </div>
+
+      <div id="cp-completed-msg" style="display:none">
+        <span>✅ Checkpoint Completed</span>
+      </div>
+    </div>
+
+    <!-- No-checkpoints overlay -->
+    <div id="no-checkpoints-overlay" style="display:none">
+      <div class="overlay-card">
+        <p>📭 No checkpoints configured yet.</p>
+        <p>Go to <strong>Admin Mode</strong> to create checkpoints, or import a JSON file.</p>
+        <button id="go-admin-btn" class="btn btn-admin">⚙️ Open Admin</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================== SCREEN: REWARD ======================== -->
+  <div id="reward-screen" class="screen">
+    <div class="reward-content">
+      <div class="confetti" id="confetti-container"></div>
+      <div class="reward-celebration">🎉</div>
+      <h2 class="reward-heading">CHECKPOINT UNLOCKED!</h2>
+      <div id="reward-checkpoint-name" class="reward-cp-name"></div>
+
+      <div class="reward-points-box">
+        <div class="reward-label">POINTS EARNED</div>
+        <div id="reward-points-earned" class="reward-points">+100</div>
+      </div>
+
+      <div class="reward-total-box">
+        <span class="trophy">🏆</span>
+        <span>TOTAL SCORE: </span>
+        <span id="reward-total-score">0</span>
+      </div>
+
+      <div id="next-clue-container" class="next-clue-box">
+        <div class="clue-header">🔎 NEXT CLUE</div>
+        <div id="next-clue-text" class="clue-text"></div>
+      </div>
+
+      <div id="all-complete-msg" class="all-complete" style="display:none">
+        <div class="complete-icon">🎊</div>
+        <h3>ALL CHECKPOINTS COMPLETE!</h3>
+        <p>You've conquered Campus Quest!</p>
+      </div>
+
+      <button id="reward-continue-btn" class="btn btn-primary">▶️ CONTINUE</button>
+    </div>
+  </div>
+
+  <!-- ======================== SCREEN: ADMIN LOGIN ======================== -->
+  <div id="admin-login-screen" class="screen">
+    <div class="panel" style="margin: auto; margin-top: 100px; max-width: 400px; padding: 24px;">
+      <h2 style="text-align: center; color: var(--gold); margin-top: 0;">🔒 Admin Login</h2>
+      <p style="text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Authenticate to modify the shared configuration.</p>
+      
+      <div id="admin-login-error" style="display:none; color: var(--danger); background: rgba(255,50,50,0.1); padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; text-align: center;"></div>
+
+      <div class="form-group">
+        <label>Admin Email</label>
+        <input type="email" id="admin-email" placeholder="admin@example.com" class="input">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="admin-password" placeholder="••••••••" class="input">
+      </div>
+      
+      <button id="admin-login-btn" class="btn btn-primary" style="margin-top: 24px;">Login to Admin</button>
+      <button id="admin-login-cancel-btn" class="btn btn-outline" style="margin-top: 12px;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ======================== SCREEN: ADMIN ======================== -->
+  <div id="admin-screen" class="screen">
+    <div class="admin-header">
+      <button id="admin-back-btn" class="icon-btn" aria-label="Back">←</button>
+      <h2>⚙️ Admin Mode</h2>
+      <button id="admin-logout-btn" class="btn btn-outline" style="padding: 4px 8px; font-size: 12px; margin-left: auto;">Logout</button>
+    </div>
+
+    <div class="admin-tools">
+      <div class="admin-toggles">
+        <label class="toggle-label">
+          <input type="checkbox" id="admin-test-mode">
+          <span>🧪 Test Mode <small>(skip camera)</small></span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="admin-show-all">
+          <span>👁️ Show All Checkpoints <small>(for testing)</small></span>
+        </label>
+      </div>
+      <div class="admin-buttons">
+        <button id="admin-add-btn" class="btn btn-primary">➕ Add Checkpoint</button>
+        <button id="admin-export-btn" class="btn btn-secondary">📤 Export JSON</button>
+        <button id="admin-import-btn" class="btn btn-secondary">📥 Import JSON</button>
+        <input type="file" id="admin-import-file" accept=".json" style="display:none">
+      </div>
+    </div>
+
+    <div id="admin-checkpoint-list" class="admin-cp-list">
+      <p class="empty-msg">No checkpoints configured. Tap ➕ to create one!</p>
+    </div>
+  </div>
+
+  <!-- ======================== SCREEN: CHECKPOINT FORM ======================== -->
+  <div id="checkpoint-form-screen" class="screen">
+    <div class="form-header">
+      <button id="form-cancel-btn" class="icon-btn" aria-label="Cancel">←</button>
+      <h2 id="form-title">Create Checkpoint</h2>
+    </div>
+
+    <div class="form-body">
+      <div id="form-map-container" class="form-map"></div>
+      <p class="form-map-hint">👆 Tap the map to set the checkpoint location</p>
+
+      <div class="form-group">
+        <label for="form-name">Checkpoint Name</label>
+        <input type="text" id="form-name" placeholder="e.g. Library" maxlength="50">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label for="form-lat">Latitude</label>
+          <input type="number" id="form-lat" step="any" readonly placeholder="Tap map">
+        </div>
+        <div class="form-group half">
+          <label for="form-lng">Longitude</label>
+          <input type="number" id="form-lng" step="any" readonly placeholder="Tap map">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label for="form-radius">Radius (metres)</label>
+          <input type="number" id="form-radius" value="50" min="10" max="500">
+        </div>
+        <div class="form-group half">
+          <label for="form-reward">Reward (points)</label>
+          <input type="number" id="form-reward" value="100" min="10" max="10000">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="form-clue">Clue (revealed after this checkpoint is completed)</label>
+        <textarea id="form-clue" rows="3" placeholder="e.g. Where knowledge lives, your next challenge waits…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="form-creature">Checkpoint Object</label>
+        <select id="form-creature">
+          <option value="treasure">📦 Treasure Chest</option>
+          <option value="artifact">💎 Glowing Artifact</option>
+          <option value="mystery">🎁 Mystery Box</option>
+          <option value="portal">🌀 Portal</option>
+          <option value="emblem">🏛️ Campus Emblem</option>
+          <option value="key">🔑 Golden Key</option>
+          <option value="star">⭐ Star</option>
+          <option value="guardian">🛡️ Guardian</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="form-order">Sequence Order</label>
+        <input type="number" id="form-order" value="1" min="1" max="100">
+        <small class="form-hint">Determines the order checkpoints appear to players (1 = first).</small>
+      </div>
+
+      <div class="form-actions">
+        <button id="form-save-btn" class="btn btn-primary">💾 SAVE CHECKPOINT</button>
+        <button id="form-delete-btn" class="btn btn-danger" style="display:none">🗑️ DELETE CHECKPOINT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== MENU OVERLAY ======================== -->
+  <div id="menu-overlay" class="overlay" style="display:none">
+    <div class="overlay-backdrop" id="menu-backdrop"></div>
+    <div class="menu-content">
+      <h3>🗺️ CAMPUS QUEST</h3>
+      <button id="menu-continue" class="btn btn-primary">▶️ Continue Playing</button>
+      <button id="menu-admin" class="btn btn-secondary">⚙️ Admin Mode</button>
+      <button id="menu-reset" class="btn btn-danger">🔄 Reset Progress</button>
+    </div>
+  </div>
+
+  <!-- ======================== TOAST ======================== -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- ======================== SCRIPTS ======================== -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./app.js"></script>
+</body>
+</html>
