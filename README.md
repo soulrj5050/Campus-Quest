@@ -9,6 +9,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
+## 🎮 Play Campus Quest
+
+[**Click here to play Campus Quest**](https://campusquest007.netlify.app)
+
+---
 
 ## 📖 Overview
 
